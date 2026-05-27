@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en" data-theme="midnight">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Study Dost AI — your study buddy</title>
+  <meta name="description" content="Study Dost AI — an AI-powered STEM tutor for high school students. Get any concept explained 3 different ways, earn XP, unlock badges. By Sami Ahraf Nirob." />
+  <meta name="author" content="Sami Ahraf Nirob" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🧠%3C/text%3E%3C/svg%3E" />
+
+  <!-- Math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <!-- Code highlighting (a dark theme that matches our palette) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Confetti canvas (full-screen, click-through) -->
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <!-- Mobile sidebar backdrop (tap to close) -->
+  <div class="cc-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+  <!-- Achievement toast container -->
+  <div class="cc-toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <!-- Animated mascot (bottom-right) -->
+  <div class="cc-mascot" id="mascot" data-state="idle" aria-hidden="true">
+    <div class="cc-mascot-bubble" id="mascotBubble"></div>
+    <div class="cc-mascot-body">
+      <span class="cc-mascot-face">🧠</span>
+      <span class="cc-mascot-spark cc-spark-1">✨</span>
+      <span class="cc-mascot-spark cc-spark-2">⭐</span>
+      <span class="cc-mascot-spark cc-spark-3">💫</span>
+    </div>
+  </div>
+
+  <div class="cc-app">
+
+    <!-- ========================= Sidebar ========================= -->
+    <aside class="cc-sidebar" id="sidebar">
+
+      <!-- Stats panel -->
+      <div class="cc-side-section cc-stats">
+        <div class="cc-stats-header">
+          <div class="cc-level-pill" title="Your level">
+            <span class="cc-level-num" id="levelNum">1</span>
+          </div>
+          <div class="cc-stats-meta">
+            <div class="cc-rank" id="rankLabel">Curious Beginner</div>
+            <div class="cc-xp-text"><span id="xpCurrent">0</span> / <span id="xpNext">50</span> XP</div>
+          </div>
+        </div>
+        <div class="cc-xp-bar" aria-label="XP progress">
+          <div class="cc-xp-fill" id="xpFill"></div>
+        </div>
+
+        <div class="cc-stats-row">
+          <div class="cc-stat" title="Daily streak">
+            <span class="cc-stat-icon">🔥</span>
+            <span class="cc-stat-num" id="streakNum">0</span>
+            <span class="cc-stat-label">streak</span>
+          </div>
+          <div class="cc-stat" title="Concepts learned">
+            <span class="cc-stat-icon">📚</span>
+            <span class="cc-stat-num" id="conceptsNum">0</span>
+            <span class="cc-stat-label">concepts</span>
+          </div>
+          <div class="cc-stat" title="Practice problems">
+            <span class="cc-stat-icon">🎯</span>
+            <span class="cc-stat-num" id="practiceNum">0</span>
+            <span class="cc-stat-label">practice</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subjects -->
+      <div class="cc-side-section">
+        <h2>📚 Subject</h2>
+        <div class="cc-subjects" id="subjects"></div>
+      </div>
+
+      <!-- Country / curriculum mode -->
+      <div class="cc-side-section">
+        <h2>🌍 Country mode <span class="cc-badge-count" id="countryHint">curriculum</span></h2>
+        <div class="cc-countries" id="countries"></div>
+        <p class="cc-country-help" id="countryHelp"></p>
+      </div>
+
+      <!-- Badges -->
+      <div class="cc-side-section">
+        <h2>🏅 Badges <span class="cc-badge-count" id="badgeCount">0/10</span></h2>
+        <div class="cc-badges" id="badges"></div>
+      </div>
+
+      <!-- Theme -->
+      <div class="cc-side-section">
+        <h2>🎨 Theme</h2>
+        <div class="cc-themes" id="themes"></div>
+      </div>
+
+      <!-- Tips -->
+      <div class="cc-side-section">
+        <h2>💡 Tips</h2>
+        <ul class="cc-tips">
+          <li>Be specific: <i>"Why does ice float?"</i> beats <i>"physics"</i>.</li>
+          <li>Tap <b>Explain Even Simpler</b> if it still feels fuzzy.</li>
+          <li>Hit <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to submit instantly.</li>
+          <li>Star ⭐ your favorites to find them later.</li>
+        </ul>
+      </div>
+
+      <!-- Actions -->
+      <div class="cc-side-section">
+        <button class="cc-btn cc-btn-ghost cc-full" id="clearHistoryBtn">🗑️ Clear History</button>
+      </div>
+
+      <div class="cc-side-footer">
+        Built by <b>Sami Ahraf Nirob</b><br/>
+        Powered by Featherless.ai · DeepSeek-V3
+      </div>
+    </aside>
+
+    <!-- ========================= Main ========================= -->
+    <main class="cc-main">
+      <button class="cc-menu-toggle" id="menuToggle" aria-label="Toggle sidebar">☰</button>
+
+      <header class="cc-hero">
+        <h1>🧠 Study Dost AI</h1>
+        <p class="cc-tagline">Your AI study buddy — explains any STEM concept <b>3 ways</b>, helps you practice, and rewards your curiosity 🚀</p>
+      </header>
+
+      <!-- View tabs -->
+      <div class="cc-tabs" id="viewTabs">
+        <button class="cc-tab active" data-view="ask">✨ Ask</button>
+        <button class="cc-tab" data-view="favorites">⭐ Favorites <span class="cc-tab-count" id="favTabCount">0</span></button>
+      </div>
+
+      <!-- ASK VIEW -->
+      <section class="cc-view" id="viewAsk">
+
+        <!-- Suggestion chips -->
+        <div class="cc-chips" id="chipsRow"></div>
+
+        <!-- Ask form -->
+        <section class="cc-ask">
+          <form id="askForm">
+            <textarea
+              id="conceptInput"
+              placeholder="Ask anything STEM…  (e.g. Why does ice float? · Solve x² - 5x + 6 = 0 · What is recursion?)"
+              rows="3"
+              required></textarea>
+            <div class="cc-ask-row">
+              <div class="cc-tag-row">
+                <span class="cc-tag" id="subjectTag">📚 General</span>
+                <span class="cc-tag cc-country-tag" id="countryTag" hidden></span>
+              </div>
+              <div class="cc-ask-actions">
+                <button type="button" class="cc-btn cc-btn-ghost" id="micBtn" title="Voice input" aria-label="Voice input">🎤</button>
+                <button type="button" class="cc-btn cc-btn-ghost" id="surpriseBtn" title="Random question">🎲 Surprise me</button>
+                <button type="submit" class="cc-btn cc-btn-primary" id="explainBtn">✨ Explain it!</button>
+              </div>
+            </div>
+          </form>
+          <div class="cc-error" id="errorBox" hidden></div>
+        </section>
+
+        <!-- Loading -->
+        <div class="cc-loading" id="loadingBox" hidden>
+          <div class="cc-spinner"></div>
+          <div id="loadingMsg">Loading…</div>
+        </div>
+
+        <!-- Current result -->
+        <section class="cc-result" id="resultBox" hidden>
+          <div class="cc-question" id="currentQuestion"></div>
+
+          <div class="cc-cards">
+            <article class="cc-card cc-card-anim" id="cardStep" style="--anim-delay:0ms">
+              <div class="cc-card-head">
+                <h3>🔢 Step-by-Step</h3>
+                <div class="cc-card-tools">
+                  <button class="cc-iconbtn" data-tts="step_by_step" title="Read aloud">🔊</button>
+                  <button class="cc-iconbtn" data-copy="step_by_step" title="Copy">📋</button>
+                </div>
+              </div>
+              <div class="cc-body" data-key="step_by_step"></div>
+            </article>
+
+            <article class="cc-card cc-card-anim" id="cardAnalogy" style="--anim-delay:80ms">
+              <div class="cc-card-head">
+                <h3>🌍 Real-World Analogy</h3>
+                <div class="cc-card-tools">
+                  <button class="cc-iconbtn" data-tts="real_world_analogy" title="Read aloud">🔊</button>
+                  <button class="cc-iconbtn" data-copy="real_world_analogy" title="Copy">📋</button>
+                </div>
+              </div>
+              <div class="cc-body" data-key="real_world_analogy"></div>
+            </article>
+
+            <article class="cc-card cc-card-anim" id="cardVisual" style="--anim-delay:160ms">
+              <div class="cc-card-head">
+                <h3>🎨 Visual Cue</h3>
+                <div class="cc-card-tools">
+                  <button class="cc-iconbtn" data-tts="visual_cue" title="Read aloud">🔊</button>
+                  <button class="cc-iconbtn" data-copy="visual_cue" title="Copy">📋</button>
+                </div>
+              </div>
+              <div class="cc-body" data-key="visual_cue"></div>
+            </article>
+          </div>
+
+          <div class="cc-encourage" id="encourageBox"></div>
+
+          <div class="cc-actions">
+            <button class="cc-btn cc-btn-secondary" id="simplerBtn">🔄 Explain Even Simpler</button>
+            <select class="cc-select" id="difficultySelect" aria-label="Practice difficulty">
+              <option>Easy</option>
+              <option selected>Medium</option>
+              <option>Hard</option>
+            </select>
+            <button class="cc-btn cc-btn-primary" id="practiceBtn">🎯 Give Me a Practice Problem</button>
+            <button class="cc-btn cc-btn-ghost" id="favBtn" title="Save to favorites">☆ Favorite</button>
+          </div>
+
+          <article class="cc-card cc-card-extra" id="simplerCard" hidden>
+            <div class="cc-card-head">
+              <h3>🧒 Like You're 10</h3>
+              <div class="cc-card-tools">
+                <button class="cc-iconbtn" data-tts="simpler" title="Read aloud">🔊</button>
+              </div>
+            </div>
+            <div class="cc-body" id="simplerBody"></div>
+          </article>
+
+          <article class="cc-card cc-card-extra cc-practice" id="practiceCard" hidden>
+            <div class="cc-card-head">
+              <h3>🎯 Practice Problem <span class="cc-tag" id="practiceDiff"></span></h3>
+            </div>
+            <div class="cc-body" id="practiceBody"></div>
+
+            <div class="cc-attempt">
+              <label for="practiceAttempt">Your attempt (optional):</label>
+              <textarea id="practiceAttempt" rows="2" placeholder="Try it before peeking 👀"></textarea>
+            </div>
+
+            <details class="cc-answer" id="practiceAnswerWrap">
+              <summary>🔍 Reveal Answer (+5 XP for trying)</summary>
+              <p><b>✅ Correct Answer:</b></p>
+              <div class="cc-body" id="practiceAnswer"></div>
+              <p><b>📝 Worked Solution:</b></p>
+              <div class="cc-body" id="practiceSolution"></div>
+              <div class="cc-self-check" id="selfCheckBox" hidden>
+                <p><b>Your attempt:</b></p>
+                <div class="cc-body" id="yourAttempt"></div>
+                <div class="cc-self-row">
+                  <span>Got it right?</span>
+                  <button class="cc-btn cc-btn-secondary" data-self="yes">✅ Nailed it</button>
+                  <button class="cc-btn cc-btn-ghost" data-self="no">😅 Almost</button>
+                </div>
+              </div>
+            </details>
+          </article>
+        </section>
+
+        <!-- History -->
+        <section class="cc-history" id="historySection" hidden>
+          <h2>🕘 Session History</h2>
+          <div id="historyList"></div>
+        </section>
+      </section>
+
+      <!-- FAVORITES VIEW -->
+      <section class="cc-view" id="viewFavorites" hidden>
+        <h2 class="cc-view-title">⭐ Your Favorites</h2>
+        <div id="favoritesList"></div>
+        <div class="cc-empty" id="favEmpty" hidden>
+          No favorites yet. Star ⭐ explanations to save them here.
+        </div>
+      </section>
+
+      <footer class="cc-footer">
+        Built with ❤️ for curious students by <a href="#" class="cc-credit">Sami Ahraf Nirob</a> · Study Dost AI
+      </footer>
+    </main>
+  </div>
+
+  <!-- Libraries (CDN, no build step) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+
+  <script src="config.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>
