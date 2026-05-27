@@ -1,0 +1,25 @@
+# Secrets — NEVER commit these
+.env
+backend/.env
+frontend/config.local.js
+
+# Python
+__pycache__/
+backend/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual envs
+.venv/
+venv/
+backend/.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
